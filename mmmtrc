@@ -1,0 +1,120 @@
+Swipe Down One Finger
+Mouse Button:5
+Key Code:
+#Shift
+#Alt
+#Control
+#Super
+#Single Action
+End Swipe Down One Finger
+
+Swipe Up One Finger
+Mouse Button:4
+#Key Code:
+#Shift
+#Alt
+#Control
+#Super
+#Single Action
+End Swipe Up One Finger
+
+Swipe Left One Finger
+Mouse Button:6
+#Key Code:
+#Shift
+#Alt
+#Control
+#Super
+#Single Action
+End Swipe Left One Finger
+
+Swipe Right One Finger
+Mouse Button:7
+#Key Code:
+#Shift
+#Alt
+#Control
+#Super
+#Single Action
+End Swipe Right One Finger
+
+Swipe Down Two Fingers
+#Mouse Button:
+Key Code:117
+#Shift
+#Alt
+#Control
+#Super
+Single Action
+End Swipe Down Two Fingers
+
+Swipe Up Two Fingers
+#Mouse Button:
+Key Code:112
+#Shift
+#Alt
+#Control
+#Super
+Single Action
+End Swipe Up Two Fingers
+
+Swipe Left Two Fingers
+#Mouse Button:
+Key Code:113
+#Shift
+Alt
+#Control
+#Super
+Single Action
+End Swipe Left Two Fingers
+
+Swipe Right Two Fingers
+#Mouse Button:
+Key Code:114
+#Shift
+Alt
+#Control
+#Super
+Single Action
+End Swipe Right Two Fingers
+
+#Currently, pinching is not supported
+#Pinch In
+#Mouse Button:
+#Key Code:
+#Shift
+#Alt
+#Control
+#Super
+#Single Action
+#End Pinch In
+#
+#Pinch Out
+#Mouse Button:
+#Key Code:
+#Shift
+#Alt
+#Control
+#Super
+#Single Action
+#End Pinch Out
+
+Double Tap One Finger
+#Mouse Button:
+#Key Code:
+#Shift
+#Alt
+#Control
+#Super
+#Single Action
+End Double Tap One Finger
+
+Doube Tap Two Fingers
+#Mouse Button:
+#Key Code:
+#Shift
+#Alt
+#Control
+#Super
+#Single Action
+End Double Tap Two Fingers

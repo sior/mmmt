@@ -1,0 +1,38 @@
+mmmt - Magic Mouse Multi Touch for Linux
+
+This software allows you to  take advantage of the multi-touch features of 
+Apple's Magic Mouse in Linux.  It is currently very buggy and only supports a limited 
+number of gestures.
+
+mmmt requires the XTest extension.
+
+mmmt needs to be run as a user that has read permission on /dev/input/event*
+
+The default behavior of the Magic Mouse will cause scrolling for all swipe 
+gestures regardless of how many fingers are used.  To disable this, run the 
+following two commands a root:
+
+modprobe -r hid-magicmouse
+modprobe hid-magicmouse emulate_scroll_wheel=N
+
+When the program starts, the file mmmtrc, located in the same directory as the
+executable,  is read to load the settings.  The default settings are:
+Single Finger Swipe Up/Down/Left/Right - Scroll
+Double Finger Swipe Left - Alt Left Arrow
+Double Finger Swipe Right - Alt Right Arrow
+Double Finger Swipe Up - Page Up
+Double Finger Swipe Down - Page Down
+
+Example of settings syntax:
+
+Swipe Left Two Fingers
+#Mouse Button:
+Key Code:113
+#Shift
+Alt
+#Control
+#Super
+Single Action
+End Swipe Left Two Fingers
+
+Lines with a # are comments and not processed.  In this example, when the user swipes to the left with two fingers, the program will simulate and alt-left arrow key press.  The ¿Single Action¿ line means that the event will only be triggered once for the swipe.	An event with that line commented out will occur continuously during the swipe (for example, scrolling).
