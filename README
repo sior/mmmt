@@ -1,8 +1,8 @@
 mmmt - Magic Mouse Multi Touch for Linux
 
 This software allows you to  take advantage of the multi-touch features of 
-Apple's Magic Mouse in Linux.  It is currently very buggy and only supports a limited 
-number of gestures.
+Apple's Magic Mouse in Linux.  It is currently very buggy and only supports a 
+limited number of gestures.
 
 mmmt requires the XTest extension.
 
@@ -35,4 +35,8 @@ Alt
 Single Action
 End Swipe Left Two Fingers
 
-Lines with a # are comments and not processed.  In this example, when the user swipes to the left with two fingers, the program will simulate and alt-left arrow key press.  The ¿Single Action¿ line means that the event will only be triggered once for the swipe.	An event with that line commented out will occur continuously during the swipe (for example, scrolling).
+Lines with a # are comments and not processed.  In this example, when the user 
+swipes to the left with two fingers, the program will simulate and alt-left 
+arrow key press.  The 'Single Action' line means that the event will only be 
+triggered once for the swipe.	An event with that line commented out will occur
+continuously during the swipe (for example, scrolling).
