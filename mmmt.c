@@ -73,6 +73,7 @@ void process_event(int code, int value, struct timeval time){
                 touch_new(current_touch);
                 touches[current_touch].id = value;
             } else {
+                check_for_tap(current_touch, time);
                 touch_remove(current_touch);
                 touches[current_touch].id = value;
             }
@@ -124,14 +125,14 @@ int init(){
     touch_two_index = -1;
 
     for (i = 0; i < NUM_TOUCH_SLOTS; i++){
-        touch_data_clear(&touches[i]);
+        touch_data_clear(i);
     }
-    tapping = 0;
-    memset(taps, 0, sizeof(taps));
 
     dpy = XOpenDisplay(NULL);
     
     load_settings();
+    
+    clear_tapping();
 
     return get_fd();
 }
@@ -142,7 +143,6 @@ int main ( int argc, char *argv[] ){
     struct input_event ev[64];
     size_t rb;
     struct timeval timeout;
-    
     if ((fd = init()) < 0){
         perror("bad init");
     }
@@ -151,7 +151,11 @@ int main ( int argc, char *argv[] ){
 for(;;){
     FD_ZERO(&set);
     FD_SET(fd, &set);
-    timeout.tv_sec = 100;
+    timeout.tv_usec = 100;
+    timeout.tv_sec = 0;
+
+    tap_timeouts();
+    
     if (select(FD_SETSIZE, &set, NULL, NULL, &timeout) > 0){
         rb = read(fd, ev, sizeof(struct input_event) * 64);
         if (rb < (int) sizeof(struct input_event)){

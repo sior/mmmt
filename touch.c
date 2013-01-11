@@ -35,9 +35,23 @@ void touch_activate(int index){
     num_touches++;
 }
 
-void touch_data_clear(touch_data *data){
-    memset(data, 0, sizeof(*data));
-    data->id = -1;
+void clear_tapping(void){
+    memset(tapping, 0, sizeof(tapping));
+}
+
+void touch_data_clear(int index){
+    //if there was a tap, preserve tap data
+    struct timeval tmp;
+    if (touches[index].flags & TOUCH_TAPPED){
+        tmp = touches[index].tap_time;
+        memset(&touches[index], 0, sizeof(touch_data));
+        touches[index].id = -1;
+        touches[index].previous_tap_time = tmp;
+        touches[index].flags |= TOUCH_TAPPED;
+    } else {
+        memset(&touches[index], 0, sizeof(touch_data));
+        touches[index].id = -1;
+    }
 }
 
 int touch_exists(int id){
@@ -58,7 +72,7 @@ int touch_index_for_id(int id){
 
 void touch_new(int id){
     if (num_touches < MAX_TOUCHES){
-        touches[id].flags = 0;
+        //touches[id].flags = 0;
         touches[id].flags |= TOUCH_NEW;
         switch(num_touches){
             case 0:
@@ -96,7 +110,7 @@ void touch_remove(int index){
             touch_one_index = -1;
         }
         //touches[index].flags = 0;
-        touch_data_clear(&touches[index]);
+        touch_data_clear(index);
         num_touches--;
     }
 }
@@ -162,25 +176,33 @@ int touch_delta(int index1, int index2){
     return d2 - d1;
 };
 
-void tap_add(int index, struct timeval time){
+void check_for_tap(int index, struct timeval time)
+{
+    if (timevaldiff(touches[index].origin_time, time) < TAP_TIME){
+        struct timeval tmp;
+        gettimeofday(&tmp, NULL);
+        touches[index].tap_time = time;
+        touches[index].flags |= TOUCH_TAPPED;
+        tapping[index]++;
+    }
+}
+
+void tap_timeouts()
+{
     int i;
-    point location = touches[index].current;
-    for (i = 0; i < MAX_TOUCHES; i++){
-        if (timevaldiff(taps[i].time, time) < 600){
-            if ((abs(taps[i].location.x - location.x) < 175) &&
-                (abs(taps[i].location.y - location.y) < 175)) {
-                if (tapping == 0)
-                    trigger_event(DOUBLE_TAP_ONE_FINGER, index, time);
-                else
-                    trigger_event(DOUBLE_TAP_TWO_FINGERS, index, time);
-                return;
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    for (i = 0; i < NUM_TOUCH_SLOTS; i++){
+        if (tapping[i]){
+            if (touches[i].flags & TOUCH_TAPPED){
+                if (timevaldiff(touches[i].previous_tap_time, time) > TAP_TIMEOUT){
+                    touches[i].flags &= ~TOUCH_TAPPED;
+                    if (tapping[i] == 2){
+                        trigger_event(DOUBLE_TAP_ONE_FINGER, i, time);
+                    }
+                    tapping[i] = 0;
+                }
             }
-        }
-        if ((taps[i].time.tv_sec == taps[i].time.tv_usec == 0) ||
-            (timevaldiff(taps[i].time, time) > 500)){
-            taps[i].location = location;
-            taps[i].time = time;
-            return;
         }
     }
 }
@@ -189,36 +211,13 @@ void touch_process(int index, struct timeval time){
     if (touches[index].flags == 0){
         return;
     }
-
+    
     if (touches[index].flags & TOUCH_NEW){
         touches[index].origin_time = time;
         touches[index].flags &= ~(TOUCH_NEW);
         touches[index].flags |= TOUCH_INITED;
     }
-    if (touches[index].flags & TOUCH_ENDED){
-        if (!(touches[index].flags & TOUCH_EVENT)){
-            long dt = timevaldiff(touches[index].origin_time, time);
-            int dx = touch_dx(index);
-            int dy = touch_dy(index);
-            if ((dt < 200) && (dx < 75) && (dy < 75)){
-                if (tapping){
-                    if (num_touches > 1){
-                        tapping++;
-                        tap_add(index, time);
-                    } else {
-                        tapping = 0;
-                    }
-                } else if (num_touches > 1){
-                    tapping++;
-                    tap_add(index, time);
-                } else {
-                    tap_add(index, time);
-                }
-            }
-        }
-        touch_remove(index);
-        return;
-    }
+    
     if (touches[index].flags & TOUCH_IGNORE_EVENTS){
         return;
     }

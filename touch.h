@@ -27,6 +27,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define NUM_TOUCH_SLOTS 22
 #define SWIPE_THRESH 150
 #define PINCH_THRESH 500000
+#define TAP_TIME 125
+#define TAP_TIMEOUT 200
 
 enum touch_flags {
     TOUCH_NEW = 1,
@@ -40,7 +42,8 @@ enum touch_flags {
     TOUCH_FOURTH = 256,
     TOUCH_TWO_TOUCH_EVENT = 512,
     TOUCH_X = 1024,
-    TOUCH_Y = 2048
+    TOUCH_Y = 2048,
+    TOUCH_TAPPED = 4096
 };
 
 typedef struct {
@@ -60,24 +63,22 @@ typedef struct {
     struct timeval origin_time;
     struct timeval event_time;
     int unknown;
+    struct timeval tap_time;
+    struct timeval previous_tap_time;
 } touch_data;
 
-typedef struct {
-    point location;
-    struct timeval time;
-} tap_data;
-
 touch_data touches[NUM_TOUCH_SLOTS];
-tap_data taps[MAX_TOUCHES];
 int num_touches;
 int current_touch;
-int tapping;
+int tapping[NUM_TOUCH_SLOTS];
 int touch_one_index;
 int touch_two_index;
 
 void touch_activate(int index);
 
-void touch_data_clear(touch_data *data);
+void clear_tapping(void);
+
+void touch_data_clear(int index);
 
 int touch_exists(int id);
 
@@ -99,6 +100,8 @@ int touch_second_index(int index);
 
 int touch_delta(int index1, int index2);
 
-void tap_add(int index, struct timeval time);
+void check_for_tap(int index, struct timeval time);
+
+void tap_timeouts();
 
 void touch_process(int index, struct timeval time);
