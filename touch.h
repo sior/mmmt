@@ -24,97 +24,79 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef TOUCHH
-#define TOUCHH
-#include <linux/input.h>
-#include <list>
+#ifndef TOUCH2H
+#define TOUCH2H
 
-#define MAX_SLOTS 25      //I think this is actually 15, but added some to be sure
-#define MAX_NUM_TOUCHES 4 //max number of touches we will track
-                           
-#define TOUCH_NEW  1
-#define TOUCH_INITED  2
-#define TOUCH_EVENT  4
-#define TOUCH_ENDED  8
-#define TOUCH_IGNORE_EVENTS  16
-#define TOUCH_FIRST  32
-#define TOUCH_SECOND  64
-#define TOUCH_THIRD  128
-#define TOUCH_FOURTH  256
-#define TOUCH_TWO_TOUCH_EVENT  512
-#define TOUCH_ORIGIN_X_SET  1024
-#define TOUCH_ORIGIN_Y_SET  2048
+#include <linux/input.h>
+
+#define MAX_NUM_FINGERS 4
+
+#define FINGER_FLAG_X_SET 1
+#define FINGER_FLAG_Y_SET 2
+#define FINGER_FLAG_NEW 4
+#define FINGER_FLAG_EVENT 8
+#define FINGER_FLAG_SINGLE 16
+#define FINGER_FLAG_IGNORE 32
+#define FINGER_FLAG_MAJOR_SET 64
 
 #define SWIPE_THRESHOLD 150
 
-class Touch{
+typedef struct {
+    int id;
+    int slot;
+    int major;
+    int minor;
+    int orientation;
+    int originX;
+    int originY;
+    int eventX;
+    int eventY;
+    int currentX;
+    int currentY;
+    int flags;
+    int unknown;
+    struct timeval originTime;
+    struct timeval eventTime;
+} Finger;
+
+class Touch2{
     private:
-        int id;
-        int major;
-        int minor;
-        int orientation;
-        int originX;
-        int originY;
-        int eventX;
-        int eventY;
-        int currentX;
-        int currentY;
-        int flags;
-        struct timeval originTime;
-        struct timeval eventTime;
-        int unknown;
-        int eventFlags;
-
-    public:
-        Touch();
+        Finger fingers[MAX_NUM_FINGERS];
+        int currentSlot;
+        int numberOfFingers;
+        int testing;
+        int idHolder;
+        Finger* getCurrentFinger();
         
-        void setId(int value);
-        void setMajor(int value);
-        void setMinor(int value);
-        void setOrientation(int value);
-        void setOriginX(int value);
-        void setOriginY(int value);
-        void setEventX(int value);
-        void setEventY(int value);
-        void setCurrentX(int value);
-        void setCurrentY(int value);
-        void setFlags(int value);
-        void setOriginTime(struct timeval value);
-        void setEventTime(struct timeval value);
-        void setUnknown(int value);
-        
-        int getId();
-        int getMajor();
-        int getMinor();
-        int getOrientation();
-        int getOriginX();
-        int getOriginY();
-        int getEventX();
-        int getEventY();
-        int getCurrentX();
-        int getCurrentY();
-        int getFlags();
-        struct timeval getOriginTime();
-        struct timeval getEventTime();
-        int getUnknown();
+        void newFinger();
+        void removeFinger();
+        void removeFinger(int index);
 
-        int isFlagSet(int flag);
-        void clearFlags();
-        void clearFlag(int flag);
+        int fingerActive(int index);
+
         void setFlag(int flag);
-        
+        void setFlag(int flag, int index);
+        void clearFlag(int flag);
+        int isFlagSet(int flag);
+        int isFlagSet(int flag, int index);
+
         void setX(int x);
         void setY(int y);
+
+        int dx(int index);
+        int dy(int index);
         
-        int dx();
-        int dy();
+        void eventHere(int event, struct timeval time);
+    public:
+        int getNumberOfFingers();
 
-        void clearData();
+        void init();
+        
+        void processEvent(struct input_event event);
 
-        void eventHere(struct timeval time);
+        void processFingers(struct timeval time);
+
+        void displayDebug();
 };
 
-void initTouches();
-void processReport(std::list<struct input_event> report);
-void processTouches(struct timeval time);
 #endif

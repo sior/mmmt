@@ -26,6 +26,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <X11/Xutil.h>
 #include <X11/extensions/XTest.h>
+#include <linux/input.h>
 #include "events.h"
 
 #include <ncurses.h>
@@ -33,6 +34,10 @@ Display *display;
 int eventKind[NUM_EVENT_TYPES];
 int eventCodes[NUM_EVENT_TYPES];
 int eventFlags[NUM_EVENT_TYPES];
+
+int buttonLeftState, buttonRightState, buttonMiddleState;
+int emulatingLeftButton, emulatingRightButton;
+int twoButtonClick;
 
 void initEvents()
 {
@@ -69,6 +74,13 @@ void initEvents()
     eventKind[EVENT_SWIPE_RIGHT_TWO] = EVENT_KEY;
     eventCodes[EVENT_SWIPE_RIGHT_TWO] = 114;
     eventFlags[EVENT_SWIPE_RIGHT_TWO] = 0 | ALT_FLAG | SINGLE_FLAG;
+
+    buttonLeftState = 0;
+    buttonRightState = 0;
+    buttonMiddleState = 0;
+    emulatingLeftButton = 0;
+    emulatingRightButton = 0;
+    twoButtonClick = TWO_BUTTON_CLICK_TWO_FINGERS;
 }
 
 int runEvent(int type)
@@ -107,3 +119,69 @@ int runEvent(int type)
     return (eventFlags[type] & SINGLE_FLAG);
 }
 
+void setButtonLeftState(int state)
+{
+    buttonLeftState = state;
+}
+
+void setButtonMiddleState(int state)
+{
+    buttonMiddleState = state;
+}
+
+void setButtonRightState(int state)
+{
+    buttonRightState = state;
+}
+
+void checkTwoButtonClick(int numberOfTouches)
+{
+    if (numberOfTouches == twoButtonClick){
+        //Emulate a second button down
+        if (buttonLeftState){
+            if (!emulatingRightButton){
+                emulatingRightButton = 1;
+                XTestFakeButtonEvent(display, 3, True, CurrentTime);
+            }
+        } else if (buttonRightState){
+            if (!emulatingLeftButton){
+                emulatingLeftButton = 1;
+                XTestFakeButtonEvent(display, 1, True, CurrentTime);
+            }
+        }
+    } else if (numberOfTouches < twoButtonClick){
+        //Emulate releasing second button
+        if (emulatingRightButton){
+            emulatingRightButton = 0;
+            XTestFakeButtonEvent(display, 3, False, CurrentTime);
+        } else if (emulatingLeftButton){
+            emulatingLeftButton = 0;
+            XTestFakeButtonEvent(display, 1, False, CurrentTime);
+        }
+    }
+    XFlush(display);
+}
+
+void updateButtonState(int button, int state)
+{
+    if (button == BTN_LEFT)
+        setButtonLeftState(state);
+    else if (button == BTN_MIDDLE)
+        setButtonMiddleState(state);
+    else if (button == BTN_RIGHT)
+        setButtonRightState(state);
+}
+
+void displayEventDebug()
+{
+    move(0,30);
+    printw("Left:\t%d  ", buttonLeftState);
+    move(1,30);
+    printw("Middle:\t%d  ", buttonMiddleState);
+    move(2,30);
+    printw("Right:\t%d   ", buttonRightState);
+    move(3,30);
+    printw("E-Left:\t%d  ", emulatingLeftButton);
+    move(4,30);
+    printw("E-Right:\t%d  ", emulatingRightButton);
+}

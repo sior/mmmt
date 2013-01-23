@@ -27,6 +27,8 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef EVENTSH
 #define EVENTSH
 
+#define DEBUG
+
 #define SHIFT_FLAG 1
 #define ALT_FLAG 2
 #define CONTROL_FLAG 4
@@ -47,6 +49,18 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define EVENT_MOUSE 1
 #define EVENT_KEY 2
 
+#define TWO_BUTTON_CLICK_DISABLED -1
+#define TWO_BUTTON_CLICK_TWO_FINGERS 2
+#define TWO_BUTTON_CLICK_THREE_FINGERS 3
+
 void initEvents();
 int runEvent(int type);
+void setButtonLeftState(int state);
+void setButtonMiddleState(int state);
+void setButtonRightState(int state);
+void checkTwoButtonClick(int numberOfTouches);
+void updateButtonState(int button, int state);
+#ifdef DEBUG
+void displayEventDebug();
+#endif
 #endif

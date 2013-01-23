@@ -34,12 +34,14 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <list>
 #include <ncurses.h>
 #include "touch.h"
+#include "events.h"
 
 #define ID_APPLE             0x05ac
 #define ID_APPLE_MAGICMOUSE  0x030d
 
-std::list<struct input_event> reportList;
+//std::list<struct input_event> reportList;
 
+//Get the file for the magic mouse events.  Loop until the mouse is discovered
 int getFd(){
     int i, fd;
     char dirname[] = "/dev/input/";
@@ -74,8 +76,9 @@ int getFd(){
 }
 
 int main ( int argc, char *argv[] ){
-    initscr();
-    initTouches();
+    Touch2 touch;
+    touch.init();
+    initEvents();
     int fd = getFd();
     fd_set set;
     int i;
@@ -85,6 +88,7 @@ int main ( int argc, char *argv[] ){
     struct input_event events[64];
 
     for (;;){
+touch.displayDebug();
         FD_ZERO(&set);
         FD_SET(fd, &set);
 
@@ -109,19 +113,24 @@ int main ( int argc, char *argv[] ){
             for (i = 0; i < (int)(bytesRead/sizeof(struct input_event)); i++){
                 if (events[i].type == 3){
                     //process mt event
-                    reportList.push_back(events[i]);
+                    //reportList.push_back(events[i]);
+                    touch.processEvent(events[i]);
                 } else if (events[i].type == 4){
                     //process misc event
                     if (events[i].code == 3){
-                        reportList.push_back(events[i]);
+                        touch.processEvent(events[i]);
+                        //reportList.push_back(events[i]);
                     }
                 } else if (events[i].type == 0){
                     //process syn event
-                    processReport(reportList);
-                    processTouches(events[i].time);
-                    reportList.clear();
+                    touch.processFingers(events[i].time);
+                    //processReport(reportList);
+                    //processTouches(events[i].time);
+                    //reportList.clear();
                 } else if (events[i].type == 1){
                     //process button event
+                    updateButtonState(events[i].code, events[i].value); 
+                    checkTwoButtonClick(touch.getNumberOfFingers());
                 }
             }
         }
