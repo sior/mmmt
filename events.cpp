@@ -174,14 +174,14 @@ void updateButtonState(int button, int state)
 
 void displayEventDebug()
 {
-    move(0,30);
+    move(0,70);
     printw("Left:\t%d  ", buttonLeftState);
-    move(1,30);
+    move(1,70);
     printw("Middle:\t%d  ", buttonMiddleState);
-    move(2,30);
+    move(2,70);
     printw("Right:\t%d   ", buttonRightState);
-    move(3,30);
+    move(3,70);
     printw("E-Left:\t%d  ", emulatingLeftButton);
-    move(4,30);
+    move(4,70);
     printw("E-Right:\t%d  ", emulatingRightButton);
 }

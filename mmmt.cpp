@@ -59,7 +59,7 @@ int getFd(){
                     path[16 + i] = dptr->d_name[i + 5];
                 }
                 path[16 + l] = '\0';
-                fd = open(path, O_RDWR);
+                fd = open(path, O_RDONLY | O_NONBLOCK );
                 struct input_id device_info;
                 ioctl(fd, EVIOCGID, &device_info);
                 if ((device_info.vendor == ID_APPLE) && 
@@ -96,19 +96,19 @@ touch.displayDebug();
         timeout.tv_sec = 0;
 
         if (select(FD_SETSIZE, &set, NULL, NULL, &timeout) > 0){
-            bytesRead = read(fd, events, sizeof(struct input_event) * 64);
+            bytesRead = read(fd, events, sizeof(struct input_event));
             if (bytesRead < (int)sizeof(struct input_event)){
                 perror("short event read error");
                 return 1;
             }
 
-            if (bytesRead > (int)(sizeof(struct input_event) * 65)){
-                if (errno == ENODEV){
-                    close(fd);
-                    fd = getFd();
-                    continue;
-                }
+            if (errno == ENODEV){
+                close(fd);
+                fd = getFd();
+                //touch.init();
+                continue;
             }
+            checkTwoButtonClick(touch.getNumberOfFingers());
 
             for (i = 0; i < (int)(bytesRead/sizeof(struct input_event)); i++){
                 if (events[i].type == 3){

@@ -45,7 +45,7 @@ void Touch2::newFinger()
     if (getCurrentFinger() == NULL){
         int i;
         for (i = 0; i < MAX_NUM_FINGERS; i++){
-            if (fingers[i].slot == -1){
+            if (fingers[i].slot < 0){
                 fingers[i].slot = currentSlot;
                 setFlag(FINGER_FLAG_NEW);
                 numberOfFingers++;
@@ -184,7 +184,11 @@ void Touch2::eventHere(int event, struct timeval time)
 
 int Touch2::getNumberOfFingers()
 {
-    return numberOfFingers;
+    int i, number = 0;
+    for (i = 0; i < MAX_NUM_FINGERS; i++)
+        if (fingers[i].slot >= 0)
+            number++;
+    return number;
 }
 
 void Touch2::init()
@@ -212,17 +216,14 @@ void Touch2::processEvent(struct input_event event)
         //}
         //0x20 finger near on new touch
         //0x40 finger down
-        if ((event.value & 0xf0) == 0x40){
-            newFinger();
+        if ((event.value & 0xf0) != 0x40){
+            
         }
         //0x60 finger near on old touch
         //0x70 finger gone
-        if ((event.value & 0xf0) == 0x70){
-            removeFinger();
-        } else {
-            if (!tmp)return;
-            tmp->unknown = event.value;
-        }
+        if (!tmp)return;
+        tmp->unknown = event.value;
+        
     } else if (event.type == 3){
         //process abs
         if (event.code == 47){
@@ -248,21 +249,17 @@ void Touch2::processEvent(struct input_event event)
             setY(event.value);
         } else if (event.code == 57){
             //id
-            move(0, 70);
-            printw("%d\n\n", event.value);
-            refresh();
             idHolder = event.value;
             if (event.value == -1){
-                move(1, 70);
-                printw("Kill slot %d\t", currentSlot);
-                removeFinger(currentSlot);
-                refresh();
+                removeFinger();
+            } else {
+                newFinger();
             }
             if (!tmp)return;
             tmp->id = event.value;
         }
     }
-    checkTwoButtonClick(numberOfFingers);
+    checkTwoButtonClick(getNumberOfFingers());
 }
 
 void Touch2::processFingers(struct timeval time)
@@ -333,20 +330,25 @@ void Touch2::displayDebug()
         move(2,i*15);
         printw("id:%d\t", fingers[i].id);
         move(3,i*15);
-        printw("dy:%d\t", dy(i));
+        printw("dx:%d\t", dx(i));
         move(4,i*15);
-        printw("flags:%d \t", fingers[i].flags);
+        printw("dy:%d\t", dy(i));
         move(5,i*15);
-        printw("unknown:%d \t", fingers[i].unknown);
+        printw("flags:%d \t", fingers[i].flags);
         move(6,i*15);
-        printw("major:%d \t", fingers[i].major);
+        printw("unknown:%d \t", fingers[i].unknown);
         move(7,i*15);
+        printw("major:%d \t", fingers[i].major);
+        move(8,i*15);
         printw("minor:%d \t", fingers[i].minor);
+        move(9,i*15);
+        printw("cX:%d \t", fingers[i].currentX);
+        move(10,i*15);
+        printw("cY:%d \t", fingers[i].currentY);
+
     }
-    
+    displayEventDebug();
     move(15,0);
-    printw("numberOfFingers:%d\t", numberOfFingers);
-    move(16,0);
-    printw("%d\t", testing);
+    printw("numberOfFingers:%d\t", getNumberOfFingers());
     refresh();
 }
