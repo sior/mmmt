@@ -81,6 +81,7 @@ void initEvents()
     emulatingLeftButton = 0;
     emulatingRightButton = 0;
     twoButtonClick = TWO_BUTTON_CLICK_TWO_FINGERS;
+    //twoButtonClick = TWO_BUTTON_CLICK_DISABLED;
 }
 
 int runEvent(int type)
