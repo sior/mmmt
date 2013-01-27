@@ -28,6 +28,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/extensions/XTest.h>
 #include <linux/input.h>
 #include "events.h"
+#include "touch.h"
 
 #include <ncurses.h>
 Display *display;
@@ -81,6 +82,7 @@ void initEvents()
     emulatingLeftButton = 0;
     emulatingRightButton = 0;
     twoButtonClick = TWO_BUTTON_CLICK_TWO_FINGERS;
+    //twoButtonClick = TWO_BUTTON_CLICK_THREE_FINGERS;
     //twoButtonClick = TWO_BUTTON_CLICK_DISABLED;
 }
 
@@ -163,7 +165,7 @@ void checkTwoButtonClick(int numberOfTouches)
     XFlush(display);
 }
 
-void updateButtonState(int button, int state)
+void updateButtonState(int button, int state, void *touch)
 {
     if (button == BTN_LEFT)
         setButtonLeftState(state);
@@ -171,6 +173,13 @@ void updateButtonState(int button, int state)
         setButtonMiddleState(state);
     else if (button == BTN_RIGHT)
         setButtonRightState(state);
+    
+    Touch2* tmp = (Touch2*)touch;
+    
+    if (state)
+        tmp->fingerClicking();
+    else
+        tmp->fingerNotClicking();
 }
 
 void displayEventDebug()

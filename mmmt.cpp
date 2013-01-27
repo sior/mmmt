@@ -129,7 +129,7 @@ touch.displayDebug();
                     //reportList.clear();
                 } else if (events[i].type == 1){
                     //process button event
-                    updateButtonState(events[i].code, events[i].value); 
+                    updateButtonState(events[i].code, events[i].value, &touch); 
                     checkTwoButtonClick(touch.getNumberOfFingers());
                 }
             }

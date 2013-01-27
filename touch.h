@@ -38,8 +38,11 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define FINGER_FLAG_SINGLE 16
 #define FINGER_FLAG_IGNORE 32
 #define FINGER_FLAG_MAJOR_SET 64
+#define FINGER_FLAG_CLICKING 128
 
 #define SWIPE_THRESHOLD 150
+
+#define FINGER_TIMEOUT 200
 
 typedef struct {
     int id;
@@ -57,15 +60,17 @@ typedef struct {
     int unknown;
     struct timeval originTime;
     struct timeval eventTime;
+    struct timeval lastTime;
 } Finger;
 
 class Touch2{
     private:
         Finger fingers[MAX_NUM_FINGERS];
         int currentSlot;
-        int numberOfFingers;
         int testing;
         int idHolder;
+        struct timeval currentEventTime;
+
         Finger* getCurrentFinger();
         
         void newFinger();
@@ -77,15 +82,23 @@ class Touch2{
         void setFlag(int flag);
         void setFlag(int flag, int index);
         void clearFlag(int flag);
+        void clearFlag(int flag, int index);
         int isFlagSet(int flag);
         int isFlagSet(int flag, int index);
 
         void setX(int x);
         void setY(int y);
+        void setMajor(int major);
+        void setMinor(int minor);
+        void setOrientation(int orientation);
+        void setUnknown(int unknown);
+        void setId(int id);
 
         int dx(int index);
         int dy(int index);
         
+        int timeOut(int index);
+
         void eventHere(int event, struct timeval time);
     public:
         int getNumberOfFingers();
@@ -95,6 +108,9 @@ class Touch2{
         void processEvent(struct input_event event);
 
         void processFingers(struct timeval time);
+        
+        void fingerClicking();
+        void fingerNotClicking();
 
         void displayDebug();
 };

@@ -59,7 +59,7 @@ void setButtonLeftState(int state);
 void setButtonMiddleState(int state);
 void setButtonRightState(int state);
 void checkTwoButtonClick(int numberOfTouches);
-void updateButtonState(int button, int state);
+void updateButtonState(int button, int state, void* touch);
 #ifdef DEBUG
 void displayEventDebug();
 #endif
