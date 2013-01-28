@@ -128,7 +128,8 @@ void Touch2::setX(int x)
     Finger *tmp = getCurrentFinger();
     if (!tmp)
         return;
-
+    if (!isFlagSet(FINGER_FLAG_IS_DOWN))
+        return;
     if (isFlagSet(FINGER_FLAG_X_SET)){
         tmp->currentX = x;
     } else {
@@ -145,7 +146,8 @@ void Touch2::setY(int y)
     Finger *tmp = getCurrentFinger();
     if (!tmp)
         return;
-    
+    if (!isFlagSet(FINGER_FLAG_IS_DOWN))
+        return;
     if (isFlagSet(FINGER_FLAG_Y_SET)){
         tmp->currentY = y;
     } else {
@@ -278,9 +280,10 @@ void Touch2::processEvent(struct input_event event)
         //process raw
         //0x20 finger near on new touch
         //0x40 finger down
-        if ((event.value & 0xf0) != 0x40){
-            
-        }
+        if ((event.value & 0xf0) == 0x40)
+            setFlag(FINGER_FLAG_IS_DOWN);
+        else
+            clearFlag(FINGER_FLAG_IS_DOWN);
         //0x60 finger near on old touch
         //0x70 finger gone
         setUnknown(event.value);
@@ -331,6 +334,8 @@ void Touch2::processFingers(struct timeval time)
         if (!fingerActive(i))
             continue;
         if (isFlagSet(FINGER_FLAG_IGNORE, i))
+            continue;
+        if (!isFlagSet(FINGER_FLAG_IS_DOWN, i))
             continue;
         if (fingers[i].id < 0){
             removeFinger();
@@ -420,6 +425,8 @@ void Touch2::displayDebug()
         printw("cX:%d \t", fingers[i].currentX);
         move(10,i*15);
         printw("cY:%d \t", fingers[i].currentY);
+        move(11,i*15);
+        printw("is down:%d \t", isFlagSet(FINGER_FLAG_IS_DOWN, i));
     }
     displayEventDebug();
     move(15,0);
