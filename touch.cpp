@@ -335,8 +335,6 @@ void Touch2::processFingers(struct timeval time)
             continue;
         if (isFlagSet(FINGER_FLAG_IGNORE, i))
             continue;
-        if (!isFlagSet(FINGER_FLAG_IS_DOWN, i))
-            continue;
         if (fingers[i].id < 0){
             removeFinger();
             continue;
@@ -345,6 +343,8 @@ void Touch2::processFingers(struct timeval time)
             removeFinger(i);
             continue;
         }
+        if (!isFlagSet(FINGER_FLAG_IS_DOWN, i))
+            continue;
         if (dx(i) > SWIPE_THRESHOLD)
             fingersSwipingRight++;
         if (dx(i) < -SWIPE_THRESHOLD)
