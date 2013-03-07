@@ -32,7 +32,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <linux/input.h>
 #include <errno.h>
 #include <list>
-#include <ncurses.h>
 #include "touch.h"
 #include "events.h"
 
@@ -76,10 +75,13 @@ int getFd(){
 }
 
 int main ( int argc, char *argv[] ){
+while(1){
+    getDisplay();
+    int fd = getFd();
+
     Touch2 touch;
     touch.init();
     initEvents();
-    int fd = getFd();
     fd_set set;
     int i;
     size_t bytesRead;
@@ -87,8 +89,7 @@ int main ( int argc, char *argv[] ){
     
     struct input_event events[64];
 
-    for (;;){
-touch.displayDebug();
+    while (1){
         FD_ZERO(&set);
         FD_SET(fd, &set);
 
@@ -103,30 +104,27 @@ touch.displayDebug();
             }
 
             if (errno == ENODEV){
+                
                 close(fd);
-                fd = getFd();
+                break;
+                //fd = getFd();
                 //touch.init();
-                continue;
+                //continue;
             }
             checkTwoButtonClick(touch.getNumberOfFingers());
 
             for (i = 0; i < (int)(bytesRead/sizeof(struct input_event)); i++){
                 if (events[i].type == 3){
                     //process mt event
-                    //reportList.push_back(events[i]);
                     touch.processEvent(events[i]);
                 } else if (events[i].type == 4){
                     //process misc event
                     if (events[i].code == 3){
                         touch.processEvent(events[i]);
-                        //reportList.push_back(events[i]);
                     }
                 } else if (events[i].type == 0){
                     //process syn event
                     touch.processFingers(events[i].time);
-                    //processReport(reportList);
-                    //processTouches(events[i].time);
-                    //reportList.clear();
                 } else if (events[i].type == 1){
                     //process button event
                     updateButtonState(events[i].code, events[i].value, &touch); 
@@ -135,6 +133,6 @@ touch.displayDebug();
             }
         }
     }
-    close(fd);
+}
     return 0;
 }

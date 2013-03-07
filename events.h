@@ -53,6 +53,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define TWO_BUTTON_CLICK_TWO_FINGERS 2
 #define TWO_BUTTON_CLICK_THREE_FINGERS 3
 
+void getDisplay();
 void initEvents();
 int runEvent(int type);
 void setButtonLeftState(int state);

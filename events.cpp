@@ -27,10 +27,10 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xutil.h>
 #include <X11/extensions/XTest.h>
 #include <linux/input.h>
+#include <unistd.h>
 #include "events.h"
 #include "touch.h"
 
-#include <ncurses.h>
 Display *display;
 int eventKind[NUM_EVENT_TYPES];
 int eventCodes[NUM_EVENT_TYPES];
@@ -40,10 +40,17 @@ int buttonLeftState, buttonRightState, buttonMiddleState;
 int emulatingLeftButton, emulatingRightButton;
 int twoButtonClick;
 
+void getDisplay()
+{
+    display = NULL;
+    while (display == NULL){
+        display = XOpenDisplay(NULL);
+        sleep(1);
+    }
+}
+
 void initEvents()
 {
-    display = XOpenDisplay(NULL);
-    
     eventKind[EVENT_SWIPE_UP_ONE] = EVENT_MOUSE;
     eventCodes[EVENT_SWIPE_UP_ONE] = 4;
     eventFlags[EVENT_SWIPE_UP_ONE] = 0;
@@ -83,7 +90,7 @@ void initEvents()
     emulatingRightButton = 0;
     twoButtonClick = TWO_BUTTON_CLICK_TWO_FINGERS;
     //twoButtonClick = TWO_BUTTON_CLICK_THREE_FINGERS;
-    //twoButtonClick = TWO_BUTTON_CLICK_DISABLED;
+    twoButtonClick = TWO_BUTTON_CLICK_DISABLED;
 }
 
 int runEvent(int type)
@@ -182,16 +189,3 @@ void updateButtonState(int button, int state, void *touch)
         tmp->fingerNotClicking();
 }
 
-void displayEventDebug()
-{
-    move(0,70);
-    printw("Left:\t%d  ", buttonLeftState);
-    move(1,70);
-    printw("Middle:\t%d  ", buttonMiddleState);
-    move(2,70);
-    printw("Right:\t%d   ", buttonRightState);
-    move(3,70);
-    printw("E-Left:\t%d  ", emulatingLeftButton);
-    move(4,70);
-    printw("E-Right:\t%d  ", emulatingRightButton);
-}

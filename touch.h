@@ -112,8 +112,6 @@ class Touch2{
         
         void fingerClicking();
         void fingerNotClicking();
-
-        void displayDebug();
 };
 
 #endif

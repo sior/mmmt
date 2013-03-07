@@ -27,8 +27,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "touch.h"
 #include "events.h"
 
-#include <ncurses.h>
-
 int timeDiff(struct timeval a, struct timeval b)
 {
     long int aMil = (a.tv_sec * 1000) + (a.tv_usec * 0.001);
@@ -253,15 +251,13 @@ int Touch2::getNumberOfFingers()
 {
     int i, number = 0;
     for (i = 0; i < MAX_NUM_FINGERS; i++)
-        if (fingers[i].slot >= 0)
+        if ((fingers[i].slot >= 0) && isFlagSet(FINGER_FLAG_IS_DOWN, i))
             number++;
     return number;
 }
 
 void Touch2::init()
 {
-    initscr();
-    refresh();
     memset(fingers, 0, MAX_NUM_FINGERS * sizeof(Finger));
     int i;
     for (i = 0; i < MAX_NUM_FINGERS; i++){
@@ -358,28 +354,28 @@ void Touch2::processFingers(struct timeval time)
     if ((fingersSwipingRight) && (fingersSwipingRight == getNumberOfFingers())){
         if (getNumberOfFingers() == 1)
             eventHere(EVENT_SWIPE_RIGHT_ONE, time);
-        else if (getNumberOfFingers() == 2)
+        if (getNumberOfFingers() == 2)
             eventHere(EVENT_SWIPE_RIGHT_TWO, time);
     }
 
     if ((fingersSwipingLeft) && (fingersSwipingLeft == getNumberOfFingers())){
         if (getNumberOfFingers() == 1)
             eventHere(EVENT_SWIPE_LEFT_ONE, time);
-        else if (getNumberOfFingers() == 2)
+        if (getNumberOfFingers() == 2)
             eventHere(EVENT_SWIPE_LEFT_TWO, time);
     }
 
     if ((fingersSwipingDown) && (fingersSwipingDown == getNumberOfFingers())){
         if (getNumberOfFingers() == 1)
             eventHere(EVENT_SWIPE_DOWN_ONE, time);
-        else if (getNumberOfFingers() == 2)
+        if (getNumberOfFingers() == 2)
             eventHere(EVENT_SWIPE_DOWN_TWO, time);
     }
 
     if ((fingersSwipingUp) && (fingersSwipingUp == getNumberOfFingers())){
         if (getNumberOfFingers() == 1)
             eventHere(EVENT_SWIPE_UP_ONE, time);
-        else if (getNumberOfFingers() == 2)
+        if (getNumberOfFingers() == 2)
             eventHere(EVENT_SWIPE_UP_TWO, time);
     }
 }
@@ -396,40 +392,3 @@ void Touch2::fingerNotClicking()
         clearFlag(FINGER_FLAG_CLICKING, i);
 }
 
-void Touch2::displayDebug()
-{
-    int i;
-    struct timeval time;
-    gettimeofday(&time, NULL);
-
-    for (i = 0; i < MAX_NUM_FINGERS; i++){
-        move(0,i*15);
-        printw("Finger%d\t", i);
-        move(1,i*15);
-        printw("slot:%d\t", fingers[i].slot);
-        move(2,i*15);
-        printw("id:%d\t", fingers[i].id);
-        move(3,i*15);
-        printw("dx:%d\t", dx(i));
-        move(4,i*15);
-        printw("dy:%d\t", dy(i));
-        move(5,i*15);
-        printw("flags:%d \t", fingers[i].flags);
-        move(6,i*15);
-        printw("unknown:%d \t", fingers[i].unknown);
-        move(7,i*15);
-        printw("major:%d \t", fingers[i].major);
-        move(8,i*15);
-        printw("minor:%d \t", fingers[i].minor);
-        move(9,i*15);
-        printw("cX:%d \t", fingers[i].currentX);
-        move(10,i*15);
-        printw("cY:%d \t", fingers[i].currentY);
-        move(11,i*15);
-        printw("is down:%d \t", isFlagSet(FINGER_FLAG_IS_DOWN, i));
-    }
-    displayEventDebug();
-    move(15,0);
-    printw("numberOfFingers:%d\t", getNumberOfFingers());
-    refresh();
-}
