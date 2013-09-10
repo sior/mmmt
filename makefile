@@ -1,6 +1,6 @@
 C=g++
 CFLAGS=-c -Wall
-LDFLAGS=-lX11 -lXtst -lrt -lncurses
+LDFLAGS=-lX11 -lXtst
 DEBUG=-g
 
 mmmt: mmmt.o events.o touch.o

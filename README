@@ -1,0 +1,8 @@
+mmmt - Magic Mouse MulitTouch
+
+First you should disable emulate_scroll_wheel and enable report_undeciphered in the hid-magicmouse kernel module.  Run the following commands as root:
+    modprobe -r hid-magicmouse
+    modprobe hid-magicmouse emulate_scroll_wheel=N report_undeciphered=Y
+
+The software needs to run as a user that can read files in /dev/input.
+You will need libxtst.
